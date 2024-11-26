@@ -14,14 +14,16 @@ function downloadrelpath {
         }
     }
 
+    $Uri = ('https://downloads.php.net/~windows/releases/' + $Path)
     Invoke-WebRequest `
-        -Uri ('https://windows.php.net/downloads/releases/' + $Path) `
+        -Uri $Uri `
         -UseBasicParsing `
         -OutFile ($script:workdir + "/download/$Path") `
         -Proxy $script:proxy
     
-    if ($Hash -Ne 'SKIP' -And $Hash -Ne (Get-FileHash -Algorithm SHA256 ($script:workdir + "/download/$Path")).Hash.ToLower()) {
-        throw "failed to download $path"
+    $fileHash = (Get-FileHash -Algorithm SHA256 ($script:workdir + "/download/$Path")).Hash.ToLower()
+    if ($Hash -Ne 'SKIP' -And $Hash -Ne $fileHash) {
+        throw "failed to download $Uri(sha256:$Hash) to $path(sha256:$fileHash)"
     }
 }
 
@@ -67,13 +69,13 @@ function fetchversion {
             }
 
             Write-Host "fetching varient $Ver $k binary" -ForegroundColor White
-            downloadrelpath -Path $Meta[$k].zip.path -Hash $Meta[$k].zip.sha256
+            downloadrelpath -Path $Meta[$k].zip.path -Hash ($Meta[$k].zip.sha256 -Or 'SKIP')
 
             Write-Host "fetching varient $Ver $k devpack" -ForegroundColor White
-            downloadrelpath -Path $Meta[$k].devel_pack.path -Hash $Meta[$k].devel_pack.sha256
+            downloadrelpath -Path $Meta[$k].devel_pack.path -Hash ($Meta[$k].devel_pack.sha256 -Or 'SKIP')
 
             Write-Host "fetching varient $Ver $k dbgpack" -ForegroundColor White
-            downloadrelpath -Path $Meta[$k].debug_pack.path -Hash $Meta[$k].debug_pack.sha256
+            downloadrelpath -Path $Meta[$k].debug_pack.path -Hash ($Meta[$k].debug_pack.sha256 -Or 'SKIP')
 
             if (Test-Path $dir -PathType Container) {
                 Write-Host "removing old dir $dir" -ForegroundColor White
@@ -120,7 +122,7 @@ function fetchversion {
 
 
 try {
-    $release_meta = Invoke-WebRequest -Uri 'https://windows.php.net/downloads/releases/releases.json' -Proxy $script:proxy
+    $release_meta = Invoke-WebRequest -Uri 'https://downloads.php.net/~windows/releases/releases.json' -Proxy $script:proxy
 } catch {
     Write-Host "Failed to fetch releases meta"
     exit 1

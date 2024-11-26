@@ -50,7 +50,7 @@ function fetchpage {
             $ret = Invoke-WebRequest -Uri $Uri -UseBasicParsing -Headers $Headers -Method $Method -Body $Body -Proxy $Proxy
             return $ret
         }catch [System.Net.WebException],[System.IO.IOException]{
-            warn "Failed to fetch php releases info from windows.php.net, try again."
+            warn "Failed to fetch page from $Uri, try again."
             Write-Host $_
             continue
         }

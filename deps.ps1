@@ -16,7 +16,7 @@ $stagingOrStable = "stable"
 
 info "fetching deps for $phpver"
 
-$uri = "https://windows.php.net/downloads/php-sdk/deps/series/packages-${phpver}-${vcver}-${arch}-${stagingOrStable}.txt"
+$uri = "https://downloads.php.net/~windows/php-sdk/deps/series/packages-${phpver}-${vcver}-${arch}-${stagingOrStable}.txt"
 info "fetching series from ${uri}"
 $series = (fetchpage $uri).Content
 
@@ -28,7 +28,7 @@ foreach ($filename in $files) {
         continue
     }
     info "fetching ${filename}"
-    $ret = dlwithhash -Uri "https://windows.php.net/downloads/php-sdk/deps/${vcver}/${arch}/${filename}" -Dest ($script:workdir + "\download\deps\${filename}")
+    $ret = dlwithhash -Uri "https://downloads.php.net/~windows/php-sdk/deps/${vcver}/${arch}/${filename}" -Dest ($script:workdir + "\download\deps\${filename}")
     if(!$ret){
         err "failed fetching ${filename}"
     }
